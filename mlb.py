@@ -12,7 +12,7 @@ def get_game_data():
     try:
         url = (
             f"{BASE_URL}/schedule?sportId=1&teamId={ORIOLES_TEAM_ID}"
-            f"&date={today}&hydrate=probablePitcher,weather,linescore"
+            f"&date={today}&hydrate=probablePitcher(stats),weather,linescore"
         )
         sched = requests.get(url, timeout=10).json()
     except Exception as e:
