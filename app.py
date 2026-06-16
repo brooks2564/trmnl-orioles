@@ -35,6 +35,7 @@ _thread.start()
 
 
 @app.route("/api/display")
+@app.route("/api/display/")
 def display():
     with _lock:
         data = _cache.get("data") or {}
@@ -44,9 +45,14 @@ def display():
     base = f"{request.scheme}://{request.host}"
     return jsonify(
         {
+            "status": 0,
             "image_url": f"{base}/image.png",
+            "filename": "orioles.png",
             "refresh_rate": refresh_rate,
-            "strategy": "diff",
+            "reset_firmware": False,
+            "update_firmware": False,
+            "firmware_url": None,
+            "special_function": "sleep",
         }
     )
 
