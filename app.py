@@ -72,6 +72,31 @@ def image():
     return send_file(io.BytesIO(png), mimetype="image/png")
 
 
+@app.route("/api/setup")
+@app.route("/api/setup/")
+def setup():
+    return jsonify(
+        {
+            "status": 200,
+            "api_key": request.headers.get("Access-Token", ""),
+            "friendly_name": "Orioles Dashboard",
+            "image_url": f"{request.scheme}://{request.host}/image.png",
+            "filename": "orioles.png",
+            "refresh_rate": 60,
+            "reset_firmware": False,
+            "update_firmware": False,
+            "firmware_url": None,
+            "special_function": "sleep",
+        }
+    )
+
+
+@app.route("/api/log", methods=["POST"])
+@app.route("/api/log/", methods=["POST"])
+def log():
+    return jsonify({"status": 200})
+
+
 @app.route("/preview")
 def preview():
     """Browser-viewable preview of the current image."""
