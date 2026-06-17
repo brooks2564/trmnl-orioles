@@ -106,27 +106,43 @@ def _parse_pregame(gd, sched_game):
     home_pp = sched_teams.get("home", {}).get("probablePitcher", {})
     weather = gd.get("weather", {})
 
+    weather_parts = []
+    if weather.get("temp"):
+        weather_parts.append(f"{weather['temp']}°F")
+    if weather.get("condition"):
+        weather_parts.append(weather["condition"])
+    if weather.get("wind"):
+        weather_parts.append(f"Wind: {weather['wind']}")
+
     return {
         "start_time": start_time,
         "away_probable": {
             "name": away_pp.get("fullName", "TBD"),
-            "era": _pp_era(away_pp),
+            "era": _fetch_era(away_pp.get("id")),
         },
         "home_probable": {
             "name": home_pp.get("fullName", "TBD"),
-            "era": _pp_era(home_pp),
+            "era": _fetch_era(home_pp.get("id")),
         },
-        "weather": (
-            f"{weather.get('temp', '')}°F  {weather.get('condition', '')}  "
-            f"Wind: {weather.get('wind', '')}"
-        ).strip(),
+        "weather": "  ".join(weather_parts),
     }
 
 
-def _pp_era(pitcher):
-    for s in pitcher.get("stats", []):
-        if s.get("type", {}).get("displayName") == "season":
-            return s.get("stats", {}).get("era", "N/A")
+def _fetch_era(player_id):
+    if not player_id:
+        return "N/A"
+    try:
+        url = f"{BASE_URL}/people/{player_id}?hydrate=stats(group=pitching,type=season)"
+        data = requests.get(url, timeout=8).json()
+        splits = (
+            data.get("people", [{}])[0]
+            .get("stats", [{}])[0]
+            .get("splits", [{}])
+        )
+        if splits:
+            return splits[0].get("stat", {}).get("era", "N/A")
+    except Exception:
+        pass
     return "N/A"
 
 
